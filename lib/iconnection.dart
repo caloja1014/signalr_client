@@ -16,7 +16,8 @@ abstract class IConnection {
 
   String? baseUrl;
 
-  Future<void> start({TransferFormat? transferFormat});
+  Future<void> start(
+      {TransferFormat? transferFormat});
   Future<void> send(Object? data);
   Future<void>? stop({Exception? error});
 

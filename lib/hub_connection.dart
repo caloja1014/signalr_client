@@ -219,7 +219,7 @@ class HubConnection {
     _receivedHandshakeResponse = false;
     // Set up the promise before any connection is (re)started otherwise it could race with received messages
     _handshakeCompleter = Completer();
-    await _connection.start(transferFormat: _protocol.transferFormat);
+    await _connection.start(transferFormat: _protocol.transferFormat,);
 
     try {
       final handshakeRequest =
