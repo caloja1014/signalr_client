@@ -93,6 +93,13 @@ class MessageHeaders {
     }
   }
 
+  Map<String, String> toMap() {
+    if (isEmpty)
+      return {};
+    else
+      return _headers!;
+  }
+
   @override
   String toString() {
     if (isEmpty) return '{}';

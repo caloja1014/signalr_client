@@ -251,7 +251,8 @@ class HttpConnection implements IConnection {
 
     _connectionState = ConnectionState.Connecting;
 
-    _startInternalPromise = _startInternal(transferFormat);
+    _startInternalPromise = _startInternal(transferFormat,
+        _options.headers != null ? _options.headers!.toMap() : null);
     await _startInternalPromise;
 
     // The TypeScript compiler thinks that connectionState must be Connecting here. The TypeScript compiler is wrong.
@@ -347,7 +348,8 @@ class HttpConnection implements IConnection {
     }
   }
 
-  Future<void> _startInternal(TransferFormat transferFormat) async {
+  Future<void> _startInternal(
+      TransferFormat transferFormat, Map<String, dynamic>? headers) async {
     // Store the original base url and the access token factory since they may change
     // as part of negotiating
     var url = baseUrl;
@@ -360,7 +362,7 @@ class HttpConnection implements IConnection {
           _transport = _constructTransport(HttpTransportType.WebSockets);
           // We should just call connect directly in this case.
           // No fallback or negotiate in this case.
-          await _startTransport(url, transferFormat);
+          await _startTransport(url, transferFormat, headers);
         } else {
           throw GeneralError(
               "Negotiation can only be skipped when using the WebSocket transport directly.");
@@ -406,8 +408,8 @@ class HttpConnection implements IConnection {
           throw GeneralError("Negotiate redirection limit exceeded.");
         }
 
-        await _createTransport(
-            url, _options.transport, negotiateResponse, transferFormat);
+        await _createTransport(url, _options.transport, negotiateResponse,
+            transferFormat, headers);
       }
 
       if (_transport is LongPollingTransport) {
@@ -490,13 +492,14 @@ class HttpConnection implements IConnection {
       String? url,
       Object? requestedTransport,
       NegotiateResponse negotiateResponse,
-      TransferFormat requestedTransferFormat) async {
+      TransferFormat requestedTransferFormat,
+      Map<String, dynamic>? headers) async {
     var connectUrl = _createConnectUrl(url, negotiateResponse.connectionToken);
     if (_isITransport(requestedTransport)) {
       _logger?.finer(
           "Connection was provided an instance of ITransport, using that directly.");
       _transport = requestedTransport as ITransport?;
-      await _startTransport(connectUrl, requestedTransferFormat);
+      await _startTransport(connectUrl, requestedTransferFormat, headers);
 
       connectionId = negotiateResponse.connectionId;
       return;
@@ -526,7 +529,7 @@ class HttpConnection implements IConnection {
       }
 
       try {
-        await _startTransport(connectUrl, requestedTransferFormat);
+        await _startTransport(connectUrl, requestedTransferFormat, headers);
         connectionId = negotiate.connectionId;
         return;
       } catch (ex) {
@@ -568,10 +571,11 @@ class HttpConnection implements IConnection {
     }
   }
 
-  Future<void> _startTransport(String? url, TransferFormat transferFormat) {
+  Future<void> _startTransport(String? url, TransferFormat transferFormat,
+      Map<String, dynamic>? headers) {
     _transport!.onReceive = onreceive;
     _transport!.onClose = _stopConnection;
-    return _transport!.connect(url, transferFormat);
+    return _transport!.connect(url, transferFormat, headers);
   }
 
   ITransport _resolveTransport(
