@@ -36,7 +36,8 @@ class ServerSentEventsTransport implements ITransport {
 
   // Methods
   @override
-  Future<void> connect(String? url, TransferFormat transferFormat) async {
+  Future<void> connect(String? url, TransferFormat transferFormat,
+      Map<String, dynamic>? headers) async {
     assert(!isStringEmpty(url));
     _logger?.finest("(SSE transport) Connecting");
 

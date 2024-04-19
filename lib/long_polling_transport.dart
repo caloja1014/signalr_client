@@ -46,7 +46,7 @@ class LongPollingTransport implements ITransport {
   }
 
   @override
-  Future<void> connect(String? url, TransferFormat transferFormat) async {
+  Future<void> connect(String? url, TransferFormat transferFormat, Map<String, dynamic>? headers) async {
     assert(!isStringEmpty(url));
 
     _url = url;
